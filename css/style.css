@@ -49,8 +49,8 @@ header {
 }
 
 .header-icon {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   border: 3px solid rgba(255, 255, 255, 0.3);
@@ -447,8 +447,8 @@ footer {
   }
 
   .header-icon {
-    width: 70px;
-    height: 70px;
+    width: 55px;
+    height: 55px;
   }
 
   header h1 {

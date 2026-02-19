@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>アイコン自動生成</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .message {
+      margin: 20px 0;
+      font-size: 1.1em;
+      color: #666;
+    }
+    .success {
+      color: #27ae60;
+      font-weight: bold;
+    }
+    .error {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    .file-list {
+      text-align: left;
+      margin-top: 20px;
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      margin-top: 20px;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📱 ローン計算アプリ アイコン生成</h1>
+    <p class="message">ページを読み込んでください。アイコンが自動的に生成・ダウンロードされます。</p>
+    <div class="spinner" id="spinner"></div>
+    <p id="status" class="message">準備中...</p>
+    <div class="file-list" id="files"></div>
+    <button onclick="location.reload()">やり直す</button>
+  </div>
+
+  <script>
+    // ページ読み込み時に自動実行
+    window.addEventListener('load', async () => {
+      try {
+        await generateAllIcons();
+      } catch (e) {
+        document.getElementById('status').className = 'message error';
+        document.getElementById('status').textContent = 'エラーが発生しました: ' + e.message;
+        document.getElementById('spinner').style.display = 'none';
+      }
+    });
+
+    async function generateAllIcons() {
+      const sizes = [180, 152, 167, 192];
+      const files = [];
+
+      document.getElementById('status').textContent = 'アイコンを生成中...';
+
+      for (let i = 0; i < sizes.length; i++) {
+        const size = sizes[i];
+        await new Promise((resolve) => {
+          setTimeout(async () => {
+            try {
+              const canvas = await createIcon(size);
+              canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `icon-${size}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                files.push(`✓ icon-${size}.png`);
+                updateStatus(files, i + 1, sizes.length);
+                resolve();
+              }, 'image/png');
+            } catch (e) {
+              console.error(`サイズ ${size} の生成に失敗:`, e);
+              files.push(`✗ icon-${size}.png (エラー)`);
+              updateStatus(files, i + 1, sizes.length);
+              resolve();
+            }
+          }, 500 * i);
+        });
+      }
+
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('status').className = 'message success';
+      document.getElementById('status').textContent = '✓ すべてのアイコンをダウンロードしました！assets フォルダに保存してください。';
+    }
+
+    function updateStatus(files, current, total) {
+      document.getElementById('files').innerHTML = files.map(f => `<div>${f}</div>`).join('');
+      const percent = Math.round((current / total) * 100);
+      document.getElementById('status').textContent = `生成中... ${percent}%`;
+    }
+
+    async function createIcon(size) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // グラデーション背景
+        const gradient = ctx.createLinearGradient(0, 0, size, size);
+        gradient.addColorStop(0, '#667eea');
+        gradient.addColorStop(1, '#764ba2');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, size, size);
+
+        // 円マーク背景
+        const centerX = size * 0.5;
+        const centerY = size * 0.35;
+        const circleRadius = size * 0.18;
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, circleRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = size * 0.025;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, circleRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // 円マーク（¥）
+        ctx.fillStyle = 'white';
+        ctx.font = `bold ${size * 0.25}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('¥', centerX, centerY);
+
+        // グラフ部分
+        const graphStartY = size * 0.65;
+        const graphWidth = size * 0.6;
+        const graphHeight = size * 0.2;
+        const barWidth = graphWidth / 7;
+
+        const graphX = centerX - graphWidth / 2;
+
+        // グラフ背景
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath();
+        ctx.moveTo(graphX, graphStartY);
+        ctx.lineTo(graphX + graphWidth, graphStartY);
+        ctx.lineTo(graphX + graphWidth, graphStartY + graphHeight);
+        ctx.lineTo(graphX, graphStartY + graphHeight);
+        ctx.closePath();
+        ctx.fill();
+
+        // グラフの棒
+        const barHeights = [0.6, 0.9, 1.0, 0.8, 0.7, 0.5, 0.4];
+        for (let i = 0; i < barHeights.length; i++) {
+          const barX = graphX + i * barWidth + barWidth * 0.15;
+          const barHeight = graphHeight * barHeights[i];
+          const barY = graphStartY + graphHeight - barHeight;
+
+          ctx.fillStyle = `rgba(255, 255, 255, ${0.3 + barHeights[i] * 0.4})`;
+          ctx.fillRect(barX, barY, barWidth * 0.7, barHeight);
+        }
+
+        resolve(canvas);
+      });
+    }
+  </script>
+</body>
+</html>

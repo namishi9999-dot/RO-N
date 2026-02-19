@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>クイックアイコン生成ツール</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      margin: 10px 5px 10px 0;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .log {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 20px;
+      font-family: monospace;
+      font-size: 0.9em;
+      max-height: 300px;
+      overflow-y: auto;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 クイックアイコン生成</h1>
+    <p>下のボタンをクリックするだけで、iPhone用アイコンを自動生成・ダウンロードできます。</p>
+
+    <div>
+      <button onclick="generateIcon180()">180×180 アイコンを生成</button>
+      <button onclick="generateIcon152()">152×152 アイコンを生成</button>
+      <button onclick="generateIcon167()">167×167 アイコンを生成</button>
+      <button onclick="generateIcon192()">192×192 アイコンを生成</button>
+    </div>
+
+    <div class="log" id="log"></div>
+  </div>
+
+  <script>
+    function log(message) {
+      const logDiv = document.getElementById('log');
+      const timestamp = new Date().toLocaleTimeString('ja-JP');
+      logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function generateIconSize(size) {
+      log(`${size}×${size} アイコンを生成中...`);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      // グラデーション背景
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+
+      // 円マーク
+      const centerX = size * 0.5;
+      const centerY = size * 0.35;
+      const circleRadius = size * 0.18;
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, circleRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = size * 0.025;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, circleRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 円マーク内のテキスト
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${size * 0.25}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('¥', centerX, centerY);
+
+      // グラフ部分
+      const graphStartY = size * 0.65;
+      const graphWidth = size * 0.6;
+      const graphHeight = size * 0.2;
+      const barWidth = graphWidth / 7;
+
+      const graphX = centerX - graphWidth / 2;
+
+      // グラフ背景
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.beginPath();
+      ctx.roundRect(graphX, graphStartY, graphWidth, graphHeight, size * 0.02);
+      ctx.fill();
+
+      // グラフの棒
+      const barHeights = [0.6, 0.9, 1.0, 0.8, 0.7, 0.5, 0.4];
+      for (let i = 0; i < barHeights.length; i++) {
+        const barX = graphX + i * barWidth + barWidth * 0.15;
+        const barHeight = graphHeight * barHeights[i];
+        const barY = graphStartY + graphHeight - barHeight;
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.3 + barHeights[i] * 0.4})`;
+        ctx.beginPath();
+        ctx.roundRect(barX, barY, barWidth * 0.7, barHeight, size * 0.015);
+        ctx.fill();
+      }
+
+      // ダウンロード
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `icon-${size}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        log(`✓ icon-${size}.png をダウンロードしました`);
+      }, 'image/png');
+    }
+
+    function generateIcon180() {
+      generateIconSize(180);
+    }
+
+    function generateIcon152() {
+      generateIconSize(152);
+    }
+
+    function generateIcon167() {
+      generateIconSize(167);
+    }
+
+    function generateIcon192() {
+      generateIconSize(192);
+    }
+
+    log('クイックアイコン生成ツール準備完了');
+    log('各ボタンをクリックしてアイコンを生成してください');
+  </script>
+</body>
+</html>
