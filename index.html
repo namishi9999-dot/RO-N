@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ローン計算アプリ</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>ローン計算アプリ</h1>
+      <p class="subtitle">ローン計算と分析ツール</p>
+    </header>
+
+    <!-- タブナビゲーション -->
+    <div class="tabs">
+      <button class="tab-button active" data-tab="calculator">ローン計算</button>
+      <button class="tab-button" data-tab="analyzer">ローン分析</button>
+    </div>
+
+    <!-- タブ1: ローン計算 -->
+    <div id="calculator" class="tab-content active">
+      <form id="calculatorForm" class="form-section">
+        <h2>ローン計算機</h2>
+
+        <div class="form-group">
+          <label for="principal">借入額 (円)</label>
+          <input type="number" id="principal" name="principal" placeholder="1000000" required>
+        </div>
+
+        <div class="form-group">
+          <label for="annualRate">年利率 (%)</label>
+          <input type="number" id="annualRate" name="annualRate" placeholder="3.5" step="0.01" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="years">返済期間 (年)</label>
+            <input type="number" id="years" name="years" placeholder="20" min="1" required>
+          </div>
+          <div class="form-group">
+            <label for="months">月</label>
+            <input type="number" id="months" name="months" placeholder="0" min="0" max="11">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="startDate">返済開始日</label>
+          <input type="date" id="startDate" name="startDate" required>
+        </div>
+
+        <div class="form-group">
+          <label>返済方式</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="repaymentType" value="equal_payment" checked>
+              元利均等返済 (毎月返済額が一定)
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="repaymentType" value="equal_principal">
+              元金均等返済 (元本が一定)
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">計算する</button>
+      </form>
+
+      <!-- 計算結果 -->
+      <div id="calculatorResults" class="results-section" style="display: none;">
+        <h3>計算結果</h3>
+
+        <div class="result-summary">
+          <div class="result-card">
+            <div class="result-label">毎月返済額</div>
+            <div class="result-value" id="monthlyPaymentResult">-</div>
+          </div>
+          <div class="result-card">
+            <div class="result-label">総返済額</div>
+            <div class="result-value" id="totalPaymentResult">-</div>
+          </div>
+          <div class="result-card">
+            <div class="result-label">総利息額</div>
+            <div class="result-value" id="totalInterestResult">-</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="targetMonth">指定月の詳細 (月目)</label>
+          <input type="number" id="targetMonth" name="targetMonth" min="1">
+          <button type="button" id="getMonthlyDetails" class="btn btn-secondary">詳細表示</button>
+        </div>
+
+        <div id="monthlyDetailsResult" class="details-box" style="display: none;"></div>
+
+        <!-- 返済スケジュール表 -->
+        <div class="schedule-section">
+          <h3>返済スケジュール表</h3>
+          <div class="table-wrapper">
+            <table id="scheduleTable" class="schedule-table">
+              <thead>
+                <tr>
+                  <th>月</th>
+                  <th>返済日</th>
+                  <th>毎月返済額</th>
+                  <th>元本返済額</th>
+                  <th>利息返済額</th>
+                  <th>残高</th>
+                </tr>
+              </thead>
+              <tbody id="scheduleBody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- タブ2: ローン分析 -->
+    <div id="analyzer" class="tab-content">
+      <form id="analyzerForm" class="form-section">
+        <h2>ローン分析機</h2>
+
+        <div class="form-group">
+          <label for="analyzeStartDate">支払い開始日 (必須)</label>
+          <input type="date" id="analyzeStartDate" name="analyzeStartDate" required>
+        </div>
+
+        <div class="form-group">
+          <label for="analyzeMonthlyPayment">毎月支払い金額 (必須) (円)</label>
+          <input type="number" id="analyzeMonthlyPayment" name="analyzeMonthlyPayment" placeholder="50000" required>
+        </div>
+
+        <div class="optional-section">
+          <h3>任意情報 (以下いずれかを入力)</h3>
+
+          <div class="form-group">
+            <label for="analyzePrincipal">元借入額 (円)</label>
+            <input type="number" id="analyzePrincipal" name="analyzePrincipal" placeholder="1000000">
+          </div>
+
+          <div class="form-group">
+            <label for="analyzeRemainingBalance">現在の残高 (円)</label>
+            <input type="number" id="analyzeRemainingBalance" name="analyzeRemainingBalance" placeholder="500000">
+          </div>
+
+          <div class="form-group">
+            <label for="analyzeElapsedMonths">経過月数</label>
+            <input type="number" id="analyzeElapsedMonths" name="analyzeElapsedMonths" placeholder="24" min="1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>返済方式</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="analyzeRepaymentType" value="auto" checked>
+              自動判定
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="analyzeRepaymentType" value="equal_payment">
+              元利均等返済
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="analyzeRepaymentType" value="equal_principal">
+              元金均等返済
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">分析する</button>
+      </form>
+
+      <!-- 分析結果 -->
+      <div id="analyzerResults" class="results-section" style="display: none;">
+        <h3>分析結果</h3>
+
+        <div class="result-summary">
+          <div class="result-card">
+            <div class="result-label">推定金利</div>
+            <div class="result-value" id="estimatedRateResult">-</div>
+          </div>
+          <div class="result-card">
+            <div class="result-label">完済予定日</div>
+            <div class="result-value" id="payoffDateResult">-</div>
+          </div>
+          <div class="result-card">
+            <div class="result-label">残り期間</div>
+            <div class="result-value" id="remainingMonthsResult">-</div>
+          </div>
+          <div class="result-card">
+            <div class="result-label">返済方式</div>
+            <div class="result-value" id="repaymentTypeResult">-</div>
+          </div>
+        </div>
+
+        <div id="analyzerDetailsResult" class="details-box" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 ローン計算アプリ</p>
+  </footer>
+
+  <!-- JavaScriptファイル読み込み -->
+  <script src="js/calculator.js"></script>
+  <script src="js/analyzer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ローン計算テスト</title>
+</head>
+<body>
+  <h1>ローン計算アプリ - テスト</h1>
+  <div id="testResults"></div>
+  
+  <script src="js/calculator.js"></script>
+  <script src="js/analyzer.js"></script>
+  <script>
+    const results = [];
+    
+    // テスト1: 元利均等返済の計算
+    try {
+      const payment1 = LoanCalculator.calculateMonthlyPayment(1000000, 3.5, 240, 'equal_payment');
+      results.push(`✓ テスト1 (元利均等返済): 毎月返済額 = ${payment1.toFixed(2)}円`);
+    } catch (e) {
+      results.push(`✗ テスト1 失敗: ${e.message}`);
+    }
+    
+    // テスト2: 元金均等返済の計算
+    try {
+      const payment2 = LoanCalculator.calculateMonthlyPayment(1000000, 3.5, 240, 'equal_principal');
+      results.push(`✓ テスト2 (元金均等返済初月): 毎月返済額 = ${payment2.toFixed(2)}円`);
+    } catch (e) {
+      results.push(`✗ テスト2 失敗: ${e.message}`);
+    }
+    
+    // テスト3: 返済スケジュール生成
+    try {
+      const schedule = LoanCalculator.generateRepaymentSchedule(1000000, 3.5, 12, new Date(), 'equal_payment');
+      results.push(`✓ テスト3: ${schedule.length}ヶ月のスケジュールを生成`);
+    } catch (e) {
+      results.push(`✗ テスト3 失敗: ${e.message}`);
+    }
+    
+    // テスト4: 金利逆算
+    try {
+      const rate = LoanAnalyzer.estimateInterestRate(4423.48, 1000000, 240, 'equal_payment');
+      results.push(`✓ テスト4 (金利逆算): 推定年利率 = ${rate.toFixed(2)}%`);
+    } catch (e) {
+      results.push(`✗ テスト4 失敗: ${e.message}`);
+    }
+    
+    // テスト5: 完済日計算
+    try {
+      const payoffDate = LoanAnalyzer.calculatePayoffDate(1000000, 4423.48, 3.5, new Date(), 'equal_payment');
+      results.push(`✓ テスト5 (完済日計算): 完済予定日 = ${payoffDate.toISOString().split('T')[0]}`);
+    } catch (e) {
+      results.push(`✗ テスト5 失敗: ${e.message}`);
+    }
+    
+    // 結果を表示
+    const resultsDiv = document.getElementById('testResults');
+    resultsDiv.innerHTML = '<pre>' + results.join('\n') + '</pre>';
+    resultsDiv.style.cssText = 'padding: 20px; background: #f5f5f5; border: 1px solid #ccc; border-radius: 5px; font-family: monospace;';
+  </script>
+</body>
+</html>
